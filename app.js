@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 
 const port = process.env.PORT || 3000;
 
@@ -7,9 +8,7 @@ const app = express();
 
 //Middlewares
 app.use(morgan('dev'));
-
-//Bodyparser
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 //Routes
 app.use('/users', require('./routes/users'));
