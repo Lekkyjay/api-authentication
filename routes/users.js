@@ -1,4 +1,6 @@
 const router = require('express-promise-router')();
+const passport = require('passport')
+const passportConfig = require('../passport')
 
 const { validateBody, schemas } = require('../helpers/routeHelpers');
 const UsersController = require('../controllers/users');
@@ -10,6 +12,6 @@ router.route('/signup')
   .post(UsersController.signIn);
 
   router.route('/secret')
-  .get(UsersController.secret);
+  .get(passport.authenticate('jwt', {session: false }), UsersController.secret);
 
 module.exports = router;
