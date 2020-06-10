@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 module.exports = {
@@ -15,7 +16,15 @@ module.exports = {
     await newUser.save();
 
     //Respond with token
-    res.json({ user: 'created'});
+    const token = jwt.sign({
+      iss: 'lakeside',
+      sub: newUser.id,
+      iat: new Date().getTime(),
+      exp: new Date().setDate(new Date().getDate() + 1) //current time + 1day
+    }, 'lakesideauthentication');
+
+    //Respond with token
+    res.status(200).json({ token });
   },
 
   signIn: async(req, res, next) => {
