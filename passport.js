@@ -31,12 +31,33 @@ passport.use('googleToken', new GooglePlusTokenStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   passReqToCallback: true
 }, async (req, accessToken, refreshToken, profile, done) => {
-  console.log('accessToken', accessToken)
-  console.log('refreshToken', refreshToken)
-  console.log('profile', profile)
-  // User.findOrCreate({'google.id': profile.id}, function(error, user) {
-  //   return next(error, user);
-  // });
+  try {
+    console.log('accessToken', accessToken)
+    console.log('refreshToken', refreshToken)
+    console.log('profile', profile)
+    //Check if user exist in db
+    const existingUser = await User.findOne({ 'google.id': profile.id })
+    if (existingUser) {
+      console.log('User already exist in our DB')
+      return done(null, existingUser)
+    }
+
+    //if user is new, create new document in db
+    console.log('New user will be created in our DB')
+    const newUser = new User({
+      method: 'google',
+      google: {
+        id: profile.id,
+        email: profile.emails[0].value
+      }
+    })
+
+    await newUser.save()
+    done(null, newUser)
+    }
+    catch(error) {
+      done(error, false, error.message)
+    }
 }));
 
 //LOCAL STRATEGY
@@ -44,12 +65,14 @@ passport.use(new LocalStrategy({
   usernameField: 'email'
 }, async (email, password, done) => {
   try {
-    const user = await User.findOne({ email })
+    console.log('email:', email)
+    const user = await User.findOne({ 'local.email': email })
     if (!user) {
       return done(null, false)
     }
     //check if password is correct
     const isMAtch = await user.isValidPassword(password)
+    console.log('isMatch:', isMAtch)
     if (!isMAtch) {
       return done(null, false)
     }

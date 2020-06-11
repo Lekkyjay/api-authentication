@@ -15,13 +15,20 @@ module.exports = {
     const { email, password } = req.value.body;
 
     //Check if user already exist
-    const foundUser = await User.findOne({ email });
+    const foundUser = await User.findOne({"local.email": email });
     if (foundUser) {
       return res.status(400).json({ error: 'Email is already in use' });
     }
 
     //Create a new user
-    const newUser = new User({ email, password });
+    const newUser = new User({
+      method: 'local',
+      local: {
+        email: email, 
+        password: password
+      }
+    });
+    console.log(newUser)
     await newUser.save();
 
     //Generate token after user has been saved to db. 
@@ -39,8 +46,16 @@ module.exports = {
     res.status(200).json({ token });
   },
 
+  googleOAuth: async(req, res, next) => {
+    //Generate token after user signed in/signed up. 
+    //Token is used for accessing protected resource at the secret route.
+    console.log('req.user:', req.user)
+    const token = signToken(req.user)   //req.user is provided by passport from the signin route
+    res.status(200).json({ token });
+  },
+
   secret: async(req, res, next) => {
-    console.log('UsersController.secret() called!');
+    console.log('Protected resource accessed!');
     res.json({ secret: 'resource'})
   }
 }
