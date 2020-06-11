@@ -1,6 +1,7 @@
 const passport = require('passport')
 const JwtStrategy = require('passport-jwt').Strategy
 const LocalStrategy = require('passport-local').Strategy
+const GooglePlusTokenStrategy = require('passport-google-plus-token');
 const { ExtractJwt } = require('passport-jwt')
 const User = require('./models/User')
 
@@ -23,6 +24,20 @@ passport.use(new JwtStrategy(opts, async(payload, done) => {
     done(error, false)
   }
 }))
+
+//GOOGLE OAUTH STRATEGY
+passport.use('googleToken', new GooglePlusTokenStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  passReqToCallback: true
+}, async (req, accessToken, refreshToken, profile, done) => {
+  console.log('accessToken', accessToken)
+  console.log('refreshToken', refreshToken)
+  console.log('profile', profile)
+  // User.findOrCreate({'google.id': profile.id}, function(error, user) {
+  //   return next(error, user);
+  // });
+}));
 
 //LOCAL STRATEGY
 passport.use(new LocalStrategy({
