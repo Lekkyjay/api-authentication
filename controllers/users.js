@@ -24,7 +24,8 @@ module.exports = {
     const newUser = new User({ email, password });
     await newUser.save();
 
-    //Generate token
+    //Generate token after user has been saved to db. 
+    //Token is used for accessing protected resource at the secret route.
     const token = signToken(newUser);
 
     //Respond with token
@@ -32,7 +33,10 @@ module.exports = {
   },
 
   signIn: async(req, res, next) => {
-    console.log('UsersController.signIn() called!');
+    //Generate token after user signed in. 
+    //Token is used for accessing protected resource at the secret route.
+    const token = signToken(req.user)   //req.user is provided by passport from the signin route
+    res.status(200).json({ token });
   },
 
   secret: async(req, res, next) => {
