@@ -54,6 +54,13 @@ module.exports = {
     res.status(200).json({ token });
   },
 
+  facebookOAuth: async(req, res, next) => {
+    //Generate token after user signed in/signed up. 
+    //Token is used for accessing protected resource at the secret route.
+    const token = signToken(req.user)   //req.user is provided by passport from the signin route
+    res.status(200).json({ token });
+  },
+
   secret: async(req, res, next) => {
     console.log('Protected resource accessed!');
     res.json({ secret: 'resource'})
